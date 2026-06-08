@@ -1,0 +1,12 @@
+node_modules
+dist
+tmp
+.nx/cache
+.nx/workspace-data
+coverage
+*.tsbuildinfo
+.DS_Store
+*.log
+
+# Default output dir for captured sessions
+.tracebird/

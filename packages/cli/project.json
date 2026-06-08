@@ -1,0 +1,32 @@
+{
+  "name": "cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/cli/src",
+  "projectType": "application",
+  "tags": ["scope:cli"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.json && tsup",
+        "cwd": "packages/cli"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run",
+        "cwd": "packages/cli"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint src",
+        "cwd": "packages/cli"
+      }
+    }
+  }
+}

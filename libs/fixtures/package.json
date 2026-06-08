@@ -1,0 +1,23 @@
+{
+  "name": "@tracebird/fixtures",
+  "version": "0.0.1",
+  "description": "Sample OTLP payloads and recorded sessions for tracebird tests and demos.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src"
+  }
+}

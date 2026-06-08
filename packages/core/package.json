@@ -1,0 +1,25 @@
+{
+  "name": "@tracebird/core",
+  "version": "0.0.1",
+  "description": "Span → agent-decision-tree reconstruction for tracebird. Pure TypeScript, no I/O.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src"
+  }
+}

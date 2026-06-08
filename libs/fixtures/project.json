@@ -1,0 +1,31 @@
+{
+  "name": "fixtures",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/fixtures/src",
+  "projectType": "library",
+  "tags": ["scope:fixtures"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "tsup",
+        "cwd": "libs/fixtures"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run",
+        "cwd": "libs/fixtures"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint src",
+        "cwd": "libs/fixtures"
+      }
+    }
+  }
+}

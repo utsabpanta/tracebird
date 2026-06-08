@@ -1,0 +1,26 @@
+{
+  "name": "@tracebird/cli",
+  "version": "0.0.1",
+  "description": "tracebird CLI — a local OTLP receiver and time-travel UI for AI agent runs.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "tracebird": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@tracebird/core": "workspace:*",
+    "protobufjs": "^7.4.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint src"
+  }
+}
