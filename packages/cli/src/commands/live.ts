@@ -1,5 +1,9 @@
+import { join } from 'node:path';
+import { buildRun } from '@tracebird/core';
 import { createServer, listen } from '../server.js';
-import { RawSpanWriter } from '../storage/raw-writer.js';
+import { SessionStore } from '../storage/session-store.js';
+import { TraceBuffer } from '../trace-buffer.js';
+import { renderRunTree } from '../render/tree.js';
 
 export interface LiveOptions {
   port: number;
@@ -9,24 +13,22 @@ export interface LiveOptions {
 }
 
 /**
- * `tracebird live` — start the OTLP receiver and capture spans to a `.jsonl`
- * session file. (Stage 1: capture only. Stage 2 reconstructs runs; Stage 3
- * serves the UI and opens the browser.)
+ * `tracebird live` — start the OTLP receiver, buffer spans per trace, and on
+ * each completed trace reconstruct a run, print its decision tree, and append
+ * it to the session file. (Stage 3 serves the UI and opens the browser.)
  */
 export async function runLive(options: LiveOptions): Promise<void> {
-  const writer = new RawSpanWriter(options.outDir, `capture-${Date.now()}.jsonl`);
+  const store = new SessionStore(join(options.outDir, `session-${Date.now()}.jsonl`));
 
-  const server = createServer({
-    onExport: (spans) => {
-      writer.append(spans);
-      if (spans.length > 0) {
-        process.stdout.write(
-          `  ← captured ${spans.length} span(s)  (total ${writer.written})\n`,
-        );
-      }
+  const buffer = new TraceBuffer({
+    onComplete: (_traceId, spans) => {
+      const run = buildRun(spans);
+      store.addRun(run);
+      process.stdout.write('\n' + renderRunTree(run) + '\n');
     },
   });
 
+  const server = createServer({ onExport: (spans) => buffer.add(spans) });
   const boundPort = await listen(server, options.port, options.host);
   const endpoint = `http://${options.host}:${boundPort}`;
 
@@ -36,7 +38,7 @@ export async function runLive(options: LiveOptions): Promise<void> {
       '  tracebird — listening for OpenTelemetry traces',
       '',
       `  OTLP endpoint   ${endpoint}/v1/traces`,
-      `  Session file    ${writer.filePath}`,
+      `  Session file    ${store.filePath}`,
       '',
       '  Point your agent at this receiver:',
       `    export OTEL_EXPORTER_OTLP_ENDPOINT=${endpoint}`,
@@ -49,8 +51,9 @@ export async function runLive(options: LiveOptions): Promise<void> {
   await new Promise<void>((resolveShutdown) => {
     const shutdown = () => {
       process.stdout.write('\n  Stopping…\n');
+      buffer.flushAll();
       server.close(() => {
-        void writer.close().then(() => resolveShutdown());
+        void store.close().then(() => resolveShutdown());
       });
     };
     process.once('SIGINT', shutdown);
