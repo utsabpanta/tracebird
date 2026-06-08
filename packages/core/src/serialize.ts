@@ -60,10 +60,7 @@ export function serializeSession(runs: Run[]): string {
  * malformed line is skipped (and reported via `onError`) rather than aborting
  * the whole load.
  */
-export function parseSession(
-  text: string,
-  onError?: (err: RunParseError) => void,
-): Run[] {
+export function parseSession(text: string, onError?: (err: RunParseError) => void): Run[] {
   const runs: Run[] = [];
   const lines = text.split('\n');
   for (let i = 0; i < lines.length; i++) {

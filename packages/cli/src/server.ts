@@ -1,4 +1,9 @@
-import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import {
+  createServer as createHttpServer,
+  type IncomingMessage,
+  type Server,
+  type ServerResponse,
+} from 'node:http';
 import { parseOtlp, type ExportTraceServiceRequest, type Span } from '@tracebird/core';
 import { decodeProtobufTraces } from './otlp/protobuf.js';
 
@@ -36,7 +41,10 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
 }
 
 function decodeExport(contentType: string, body: Buffer): ExportTraceServiceRequest {
-  if (contentType.includes('application/x-protobuf') || contentType.includes('application/protobuf')) {
+  if (
+    contentType.includes('application/x-protobuf') ||
+    contentType.includes('application/protobuf')
+  ) {
     return decodeProtobufTraces(body);
   }
   // Default to JSON (the OTLP/HTTP JSON content type, or anything unspecified).

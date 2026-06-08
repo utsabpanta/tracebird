@@ -34,6 +34,16 @@ export {
   parseSession,
   RunParseError,
 } from './serialize.js';
+export { diffRuns, diffCalls, diffText } from './diff.js';
+export type {
+  RunDiff,
+  CallDiff,
+  NodeDiff,
+  FieldChange,
+  TextDiff,
+  DiffSegment,
+  DiffStatus,
+} from './diff.js';
 export type {
   ExportTraceServiceRequest,
   OtlpAnyValue,

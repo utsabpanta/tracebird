@@ -5,7 +5,14 @@
  * returns `undefined` rather than throwing when nothing matches.
  */
 
-import type { Attributes, AttributeValue, ChatMessage, NodeKind, Span, TokenUsage } from './types.js';
+import type {
+  Attributes,
+  AttributeValue,
+  ChatMessage,
+  NodeKind,
+  Span,
+  TokenUsage,
+} from './types.js';
 
 function asString(v: AttributeValue | undefined): string | undefined {
   return typeof v === 'string' ? v : undefined;
@@ -73,8 +80,7 @@ export function requestModel(span: Span): string | undefined {
 
 export function provider(span: Span): string | undefined {
   return (
-    asString(span.attributes['gen_ai.system']) ??
-    asString(span.attributes['gen_ai.provider.name'])
+    asString(span.attributes['gen_ai.system']) ?? asString(span.attributes['gen_ai.provider.name'])
   );
 }
 
@@ -122,7 +128,10 @@ function parseMaybeJson(value: string): unknown {
 function messagesFromIndexedAttrs(attrs: Attributes, group: string): ChatMessage[] {
   const prefix = `gen_ai.${group}.`;
   const byIndex = new Map<number, ChatMessage>();
-  const toolCalls = new Map<number, Map<number, { id?: string; name?: string; arguments?: unknown }>>();
+  const toolCalls = new Map<
+    number,
+    Map<number, { id?: string; name?: string; arguments?: unknown }>
+  >();
 
   for (const [key, value] of Object.entries(attrs)) {
     if (!key.startsWith(prefix)) continue;
@@ -214,14 +223,18 @@ function messagesFromEvents(span: Span, kind: 'prompt' | 'completion'): ChatMess
     const content = event.attributes['content'] ?? event.attributes['gen_ai.event.content'];
     out.push({
       role: asString(event.attributes['role']) ?? role,
-      content: typeof content === 'string' ? content : content == null ? '' : JSON.stringify(content),
+      content:
+        typeof content === 'string' ? content : content == null ? '' : JSON.stringify(content),
     });
   }
   return out;
 }
 
 /** Extract the prompt (input) or completion (output) messages from a span. */
-export function extractMessages(span: Span, kind: 'prompt' | 'completion'): ChatMessage[] | undefined {
+export function extractMessages(
+  span: Span,
+  kind: 'prompt' | 'completion',
+): ChatMessage[] | undefined {
   const indexed = messagesFromIndexedAttrs(span.attributes, kind);
   if (indexed.length) return indexed;
 

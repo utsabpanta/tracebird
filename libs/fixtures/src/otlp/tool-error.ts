@@ -95,7 +95,7 @@ export const toolError = traceRequest({
         'gen_ai.prompt.1.content': '{"error":"no such location \\"Atlantis\\""}',
         'gen_ai.completion.0.role': 'assistant',
         'gen_ai.completion.0.content':
-          "I couldn't find a place called \"Atlantis\" to look up the weather. Could you double-check the spelling or give me a nearby city?",
+          'I couldn\'t find a place called "Atlantis" to look up the weather. Could you double-check the spelling or give me a nearby city?',
       },
     }),
   ],

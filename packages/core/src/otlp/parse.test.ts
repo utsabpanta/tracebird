@@ -11,10 +11,9 @@ describe('anyValueToJs', () => {
     expect(anyValueToJs({ intValue: '42' })).toBe(42);
     expect(anyValueToJs({ intValue: 7 })).toBe(7);
     expect(anyValueToJs({ doubleValue: 0.5 })).toBe(0.5);
-    expect(anyValueToJs({ arrayValue: { values: [{ stringValue: 'a' }, { intValue: '2' }] } })).toEqual([
-      'a',
-      2,
-    ]);
+    expect(
+      anyValueToJs({ arrayValue: { values: [{ stringValue: 'a' }, { intValue: '2' }] } }),
+    ).toEqual(['a', 2]);
     expect(
       anyValueToJs({ kvlistValue: { values: [{ key: 'k', value: { stringValue: 'v' } }] } }),
     ).toEqual({ k: 'v' });

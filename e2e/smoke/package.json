@@ -1,0 +1,11 @@
+{
+  "name": "@tracebird/smoke",
+  "version": "0.0.1",
+  "description": "End-to-end smoke test: post a fixture to the built CLI and assert the served tree.",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "e2e": "vitest run"
+  }
+}

@@ -62,6 +62,20 @@ describe('JSON API', () => {
     const res = await fetch(`${base}/api/runs`, { method: 'POST' });
     expect(res.status).toBe(405);
   });
+
+  it('GET /api/diff diffs two runs, validating params', async () => {
+    const base = await boot('/no/such/ui');
+    const a = encodeURIComponent(weatherRun.id);
+    const b = encodeURIComponent(errorRun.id);
+
+    const diff = (await (await fetch(`${base}/api/diff?a=${a}&b=${b}`)).json()) as {
+      changed: boolean;
+    };
+    expect(diff.changed).toBe(true);
+
+    expect((await fetch(`${base}/api/diff?a=${a}`)).status).toBe(400);
+    expect((await fetch(`${base}/api/diff?a=${a}&b=missing`)).status).toBe(404);
+  });
 });
 
 describe('static UI serving', () => {

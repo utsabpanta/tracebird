@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { diffRuns } from '@tracebird/core';
 import type { SessionStore } from './storage/session-store.js';
 
 /**
@@ -41,6 +42,24 @@ export function handleApi(ctx: ApiContext, req: IncomingMessage, res: ServerResp
 
   if (url === '/api/runs') {
     json(res, 200, ctx.store.list());
+    return true;
+  }
+
+  if (url === '/api/diff') {
+    const params = new URL(req.url ?? '', 'http://localhost').searchParams;
+    const aId = params.get('a');
+    const bId = params.get('b');
+    if (!aId || !bId) {
+      json(res, 400, { error: 'diff requires ?a=<runId>&b=<runId>' });
+      return true;
+    }
+    const a = ctx.store.get(aId);
+    const b = ctx.store.get(bId);
+    if (!a || !b) {
+      json(res, 404, { error: `run not found: ${!a ? aId : bId}` });
+      return true;
+    }
+    json(res, 200, diffRuns(a, b));
     return true;
   }
 

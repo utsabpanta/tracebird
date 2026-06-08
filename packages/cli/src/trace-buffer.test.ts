@@ -9,7 +9,9 @@ const errs = parseOtlp(toolError);
 describe('TraceBuffer', () => {
   it('flushes a trace explicitly with all its spans', () => {
     const flushed: { traceId: string; count: number }[] = [];
-    const buf = new TraceBuffer({ onComplete: (id, spans) => flushed.push({ traceId: id, count: spans.length }) });
+    const buf = new TraceBuffer({
+      onComplete: (id, spans) => flushed.push({ traceId: id, count: spans.length }),
+    });
 
     // deliver the weather trace in two separate batches
     buf.add(weather.slice(0, 2));

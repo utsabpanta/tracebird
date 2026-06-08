@@ -7,7 +7,9 @@
   "bin": {
     "tracebird": "./dist/cli.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },

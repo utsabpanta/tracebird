@@ -1,12 +1,9 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
   resolve: {
     alias: {
-      '@tracebird/core': fileURLToPath(new URL('../core/src/index.ts', import.meta.url)),
       '@tracebird/fixtures': fileURLToPath(
         new URL('../../libs/fixtures/src/index.ts', import.meta.url),
       ),
@@ -14,7 +11,9 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}'],
+    environment: 'node',
+    include: ['src/**/*.e2e.test.ts'],
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 });

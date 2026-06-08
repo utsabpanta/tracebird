@@ -1,4 +1,4 @@
-import type { Run, TokenUsage } from '@tracebird/core';
+import type { Run, RunDiff, TokenUsage } from '@tracebird/core';
 
 /** Mirror of the CLI's `RunSummary` shape (the `/api/runs` payload). */
 export interface RunSummary {
@@ -30,4 +30,6 @@ export const api = {
   session: () => getJson<SessionInfo>('/api/session'),
   runs: () => getJson<RunSummary[]>('/api/runs'),
   run: (id: string) => getJson<Run>(`/api/runs/${encodeURIComponent(id)}`),
+  diff: (a: string, b: string) =>
+    getJson<RunDiff>(`/api/diff?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`),
 };

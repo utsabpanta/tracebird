@@ -4,7 +4,12 @@ import { api, type RunSummary, type SessionInfo } from './api.js';
 import { RunList } from './components/RunList.js';
 import { ExecutionTree } from './components/ExecutionTree.js';
 import { Inspector } from './components/Inspector.js';
+import { Scrubber } from './components/Scrubber.js';
+import { DiffView } from './components/DiffView.js';
+import { flattenByTime, flattenInOrder } from './tree-util.js';
 import { formatCost, formatDuration, formatTokens } from './format.js';
+
+type Mode = 'inspect' | 'diff';
 
 function findNode(node: TraceNode, id: string | undefined): TraceNode | undefined {
   if (!id) return undefined;
@@ -16,6 +21,12 @@ function findNode(node: TraceNode, id: string | undefined): TraceNode | undefine
   return undefined;
 }
 
+/** Default node selection: the first LLM call (most informative), else the root. */
+function defaultNodeId(root: TraceNode): string {
+  const all = flattenInOrder(root);
+  return (all.find((n) => n.kind === 'llm') ?? all.find((n) => n.kind === 'tool') ?? root).id;
+}
+
 export function App() {
   const [session, setSession] = useState<SessionInfo>();
   const [runs, setRuns] = useState<RunSummary[]>([]);
@@ -23,6 +34,7 @@ export function App() {
   const [run, setRun] = useState<Run>();
   const [selectedNodeId, setSelectedNodeId] = useState<string>();
   const [error, setError] = useState<string>();
+  const [mode, setMode] = useState<Mode>('inspect');
 
   // Poll the session + run list (live mode keeps appending).
   useEffect(() => {
@@ -61,7 +73,7 @@ export function App() {
       .then((r) => {
         if (cancelled) return;
         setRun(r);
-        setSelectedNodeId(r.root.id);
+        setSelectedNodeId(defaultNodeId(r.root));
       })
       .catch(() => undefined);
     return () => {
@@ -73,12 +85,33 @@ export function App() {
     () => (run ? findNode(run.root, selectedNodeId) : undefined),
     [run, selectedNodeId],
   );
+  const timeline = useMemo(() => (run ? flattenByTime(run.root) : []), [run]);
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <span className="logo">tracebird</span>
         <span className="tagline">time-travel debugger for AI agents</span>
+        <div className="mode-toggle" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'inspect'}
+            className={mode === 'inspect' ? 'active' : ''}
+            onClick={() => setMode('inspect')}
+          >
+            Inspect
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'diff'}
+            className={mode === 'diff' ? 'active' : ''}
+            onClick={() => setMode('diff')}
+          >
+            Diff
+          </button>
+        </div>
         <span className="spacer" />
         {error && <span className="badge badge-error">{error}</span>}
         {session?.live && <span className="badge badge-live">● live</span>}
@@ -87,42 +120,53 @@ export function App() {
         </span>
       </header>
 
-      <div className="layout">
-        <aside className="sidebar">
-          <h2 className="pane-title">Runs</h2>
-          <RunList runs={runs} selectedId={selectedRunId} onSelect={setSelectedRunId} />
-        </aside>
+      {mode === 'diff' ? (
+        <div className="layout-diff">
+          <DiffView runs={runs} />
+        </div>
+      ) : (
+        <div className="layout">
+          <aside className="sidebar">
+            <h2 className="pane-title">Runs</h2>
+            <RunList runs={runs} selectedId={selectedRunId} onSelect={setSelectedRunId} />
+          </aside>
 
-        <section className="main">
-          {run ? (
-            <>
-              <div className="run-bar">
-                <div className="run-bar-summary" title={run.summary}>
-                  {run.summary}
+          <section className="main">
+            {run ? (
+              <>
+                <div className="run-bar">
+                  <div className="run-bar-summary" title={run.summary}>
+                    {run.summary}
+                  </div>
+                  <div className="run-bar-metrics">
+                    <span>{formatDuration(run.durationMs)}</span>
+                    <span>{formatTokens(run.tokens.total)} tokens</span>
+                    <span>{formatCost(run.costUsd)}</span>
+                    {run.service && <span className="muted">{run.service}</span>}
+                  </div>
                 </div>
-                <div className="run-bar-metrics">
-                  <span>{formatDuration(run.durationMs)}</span>
-                  <span>{formatTokens(run.tokens.total)} tokens</span>
-                  <span>{formatCost(run.costUsd)}</span>
-                  {run.service && <span className="muted">{run.service}</span>}
-                </div>
-              </div>
-              <ExecutionTree
-                root={run.root}
-                selectedId={selectedNodeId}
-                onSelect={(node) => setSelectedNodeId(node.id)}
-              />
-            </>
-          ) : (
-            <EmptyState live={session?.live ?? false} />
-          )}
-        </section>
+                <Scrubber
+                  timeline={timeline}
+                  selectedId={selectedNodeId}
+                  onSelect={(node) => setSelectedNodeId(node.id)}
+                />
+                <ExecutionTree
+                  root={run.root}
+                  selectedId={selectedNodeId}
+                  onSelect={(node) => setSelectedNodeId(node.id)}
+                />
+              </>
+            ) : (
+              <EmptyState live={session?.live ?? false} />
+            )}
+          </section>
 
-        <aside className="inspector-pane">
-          <h2 className="pane-title">Inspector</h2>
-          <Inspector node={selectedNode} />
-        </aside>
-      </div>
+          <aside className="inspector-pane">
+            <h2 className="pane-title">Inspector</h2>
+            <Inspector node={selectedNode} />
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

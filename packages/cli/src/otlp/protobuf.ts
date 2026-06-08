@@ -13,7 +13,19 @@ import type { ExportTraceServiceRequest } from '@tracebird/core';
 
 const common = {
   AnyValue: {
-    oneofs: { value: { oneof: ['stringValue', 'boolValue', 'intValue', 'doubleValue', 'arrayValue', 'kvlistValue', 'bytesValue'] } },
+    oneofs: {
+      value: {
+        oneof: [
+          'stringValue',
+          'boolValue',
+          'intValue',
+          'doubleValue',
+          'arrayValue',
+          'kvlistValue',
+          'bytesValue',
+        ],
+      },
+    },
     fields: {
       stringValue: { type: 'string', id: 1 },
       boolValue: { type: 'bool', id: 2 },

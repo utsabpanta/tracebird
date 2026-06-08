@@ -19,11 +19,7 @@ const MIME: Record<string, string> = {
  * Serve the pre-built UI static assets from `rootDir`, with SPA fallback to
  * `index.html`. Returns false if `rootDir` doesn't exist (UI not bundled).
  */
-export function serveStatic(
-  rootDir: string,
-  req: IncomingMessage,
-  res: ServerResponse,
-): boolean {
+export function serveStatic(rootDir: string, req: IncomingMessage, res: ServerResponse): boolean {
   if (!existsSync(rootDir)) return false;
   if (req.method !== 'GET' && req.method !== 'HEAD') return false;
 

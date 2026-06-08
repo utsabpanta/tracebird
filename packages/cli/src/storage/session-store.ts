@@ -1,12 +1,6 @@
 import { createWriteStream, mkdirSync, readFileSync, type WriteStream } from 'node:fs';
 import { dirname } from 'node:path';
-import {
-  parseSession,
-  serializeRun,
-  StatusCode,
-  type Run,
-  type TraceNode,
-} from '@tracebird/core';
+import { parseSession, serializeRun, StatusCode, type Run, type TraceNode } from '@tracebird/core';
 
 /** Lightweight run summary for list views (no heavy prompt/completion payloads). */
 export interface RunSummary {

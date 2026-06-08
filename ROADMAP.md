@@ -18,6 +18,6 @@ in v1 — they live here so the line stays visible.
 ## Shipping order (v1)
 
 1. **Capture** — OTLP receiver + `parseOtlp`. ✅
-2. **Reconstruct** — `buildRun` decision tree, printed to the terminal.
-3. **Inspect** — UI: run list, execution tree, inspector. `tracebird open <file>`.
-4. **Time-travel + diff** — scrubber + side-by-side run/call diff.
+2. **Reconstruct** — `buildRun` decision tree, printed to the terminal. ✅
+3. **Inspect** — UI: run list, execution tree, inspector. `tracebird open <file>`. ✅
+4. **Time-travel + diff** — scrubber + side-by-side run/call diff. ✅

@@ -149,9 +149,7 @@ function deriveSummary(all: TraceNode[], service: string | undefined): string {
   return service ?? 'agent run';
 }
 
-function rollUp(
-  all: TraceNode[],
-): { tokens: TokenUsage; costUsd: number | null } {
+function rollUp(all: TraceNode[]): { tokens: TokenUsage; costUsd: number | null } {
   const tokens: TokenUsage = {};
   let cost = 0;
   let anyCost = false;
@@ -186,7 +184,10 @@ function rollUp(
 function runStatus(all: TraceNode[]): Run['status'] {
   if (all.some((n) => n.status.code === StatusCode.Error)) {
     const errored = all.find((n) => n.status.code === StatusCode.Error);
-    return { code: StatusCode.Error, ...(errored?.status.message ? { message: errored.status.message } : {}) };
+    return {
+      code: StatusCode.Error,
+      ...(errored?.status.message ? { message: errored.status.message } : {}),
+    };
   }
   if (all.some((n) => n.status.code === StatusCode.Ok)) return { code: StatusCode.Ok };
   return { code: StatusCode.Unset };
@@ -216,10 +217,9 @@ export function buildRun(spans: Span[], options: BuildOptions = {}): Run {
   }
 
   const traceId = spans[0]?.traceId ?? '';
-  const service =
-    spans.map((s) => s.resourceAttributes['service.name']).find((v) => typeof v === 'string') as
-      | string
-      | undefined;
+  const service = spans
+    .map((s) => s.resourceAttributes['service.name'])
+    .find((v) => typeof v === 'string') as string | undefined;
 
   const rootNodes = roots
     .slice()

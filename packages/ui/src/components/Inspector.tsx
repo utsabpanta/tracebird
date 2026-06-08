@@ -87,10 +87,18 @@ function ToolDetail({ tool }: { tool: ToolCall }) {
   return (
     <>
       <Section title="Arguments">
-        {tool.arguments !== undefined ? <JsonBlock value={tool.arguments} /> : <p className="muted">None.</p>}
+        {tool.arguments !== undefined ? (
+          <JsonBlock value={tool.arguments} />
+        ) : (
+          <p className="muted">None.</p>
+        )}
       </Section>
       <Section title="Result">
-        {tool.result !== undefined ? <JsonBlock value={tool.result} /> : <p className="muted">None.</p>}
+        {tool.result !== undefined ? (
+          <JsonBlock value={tool.result} />
+        ) : (
+          <p className="muted">None.</p>
+        )}
       </Section>
     </>
   );

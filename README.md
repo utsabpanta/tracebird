@@ -10,6 +10,8 @@ trace. tracebird captures the OpenTelemetry GenAI spans your agent already
 emits, reconstructs them into an inspectable decision tree, and lets you step
 through and diff runs locally.
 
+![tracebird inspecting an agent run](docs/screenshot.png)
+
 ## Quickstart
 
 ```sh
@@ -25,7 +27,19 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 That's the whole integration — **zero code changes** to your agent. tracebird
 accepts OTLP/HTTP in both JSON and protobuf (the SDK default).
 
-> _Screenshot coming with the UI in Stage 3._
+Have a saved session from a coworker? Replay it with no receiver:
+
+```sh
+npx @tracebird/cli open ./session.jsonl
+```
+
+## Features
+
+- **Execution tree** — flat spans reconstructed into run → agent → LLM/tool.
+- **Inspector** — prompt, completion, tool args/result, tokens, cost, model, timing.
+- **Time-travel scrubber** — drag through the run; the selection follows time.
+- **Diff** — pick two runs; see the structural + word-level text diff ("worked yesterday").
+- **Terminal tree** — `live` prints each reconstructed run as it arrives.
 
 ## How it works
 
@@ -40,9 +54,9 @@ your agent ──OTLP/HTTP──▶ @tracebird/cli ──▶ @tracebird/core ─
 
 ## v1 scope
 
-Read-only forensics on a completed run. See [`ROADMAP.md`](./ROADMAP.md) for
-what's intentionally **not** in v1 (replay, cloud sync, auth, eval scoring,
-gRPC, SQLite, …).
+Read-only forensics on a completed run. **Not yet** (see [`ROADMAP.md`](./ROADMAP.md)):
+replay-execution, cloud sync / hosted version, auth / multi-user, eval scoring,
+multi-agent topology graphs, gRPC ingest, SQLite persistence, VS Code extension.
 
 ## Develop
 
@@ -51,8 +65,13 @@ This is an [Nx](https://nx.dev) + [pnpm](https://pnpm.io) integrated monorepo.
 ```sh
 pnpm install
 npx nx run-many -t build test lint     # the full gate
+npx nx run smoke:e2e                    # end-to-end against the built CLI
 npx nx test core                       # one project
+npx nx dev ui                          # UI dev server (proxies /api to :4318)
 ```
+
+Releases are managed with [changesets](https://github.com/changesets/changesets);
+CI (`.github/workflows`) runs build + test + lint + e2e on every PR.
 
 | Package | Path | Description |
 | --- | --- | --- |
