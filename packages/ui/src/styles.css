@@ -1,15 +1,25 @@
 :root {
   --bg: #0f1117;
   --panel: #171a23;
+  --panel-2: #1d212c;
   --border: #272b38;
   --text: #e6e8ee;
   --muted: #9aa0ad;
   --accent: #6ea8fe;
+  --error: #ff6b6b;
+  --ok: #5ec5a0;
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
@@ -21,44 +31,329 @@ body {
 .app-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
+/* Header ------------------------------------------------------------------ */
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 10px 18px;
   border-bottom: 1px solid var(--border);
   background: var(--panel);
 }
-
 .logo {
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-
 .tagline {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+}
+.spacer {
+  flex: 1;
+}
+.run-count {
+  color: var(--muted);
+  font-size: 12px;
 }
 
+/* Layout ------------------------------------------------------------------ */
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 380px;
+  min-height: 0;
+}
+.sidebar,
+.inspector-pane {
+  background: var(--panel);
+  overflow-y: auto;
+}
+.sidebar {
+  border-right: 1px solid var(--border);
+}
+.inspector-pane {
+  border-left: 1px solid var(--border);
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.pane-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0;
+  padding: 14px 16px 8px;
+}
+
+/* Run list ---------------------------------------------------------------- */
+.run-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 8px;
+}
+.sidebar-empty,
+.inspector-empty {
+  color: var(--muted);
+  padding: 8px 16px;
+}
+.run-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.run-item:hover {
+  background: var(--panel-2);
+}
+.run-item.selected {
+  background: var(--panel-2);
+  border-color: var(--border);
+}
+.run-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.run-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.run-item-meta {
+  display: flex;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  padding-left: 16px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--muted);
+}
+.status-ok {
+  background: var(--ok);
+}
+.status-error {
+  background: var(--error);
+}
+
+/* Run bar + tree ---------------------------------------------------------- */
+.run-bar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+.run-bar-summary {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.run-bar-metrics {
+  display: flex;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.tree {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 0;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 0;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.tree-row:hover {
+  background: var(--panel-2);
+}
+.tree-row.selected {
+  background: #223052;
+}
+.tree-toggle {
+  width: 16px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+.tree-icon {
+  flex: 0 0 auto;
+}
+.tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-metrics {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  padding-left: 12px;
+  flex: 0 0 auto;
+}
+
+/* Badges ------------------------------------------------------------------ */
+.badge {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.badge-error {
+  color: var(--error);
+  border-color: var(--error);
+}
+.badge-live {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+/* Inspector --------------------------------------------------------------- */
+.inspector {
+  padding: 4px 16px 24px;
+}
+.inspector-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0 12px;
+}
+.inspector-title {
+  font-weight: 600;
+  word-break: break-word;
+}
+.inspector-kind {
+  color: var(--muted);
+  font-size: 12px;
+}
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0 0 12px;
+}
+.fact {
+  display: contents;
+}
+.fact dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.fact dd {
+  margin: 0;
+  font-size: 13px;
+  word-break: break-word;
+}
+.inspector-section {
+  margin-top: 16px;
+}
+.inspector-section h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inspector-section h3 .count {
+  background: var(--panel-2);
+  border-radius: 999px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+.muted {
+  color: var(--muted);
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.message {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.message-role {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.message-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+}
+.tool-calls {
+  margin-top: 6px;
+}
+.tool-call-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--ok);
+  font-size: 12px;
+}
+
+.json-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 6px 0 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Empty state ------------------------------------------------------------- */
 .empty-state {
   margin: auto;
   max-width: 520px;
   text-align: center;
   padding: 48px 24px;
 }
-
 .empty-state h1 {
   font-size: 20px;
   font-weight: 600;
 }
-
 .empty-state p {
   color: var(--muted);
 }
-
 .empty-state pre {
   background: var(--panel);
   border: 1px solid var(--border);

@@ -8,9 +8,9 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", { "projects": ["ui"], "target": "build" }],
       "options": {
-        "command": "tsc --noEmit -p tsconfig.json && tsup",
+        "command": "tsc --noEmit -p tsconfig.json && tsup && node scripts/copy-ui.mjs",
         "cwd": "packages/cli"
       }
     },

@@ -17,8 +17,18 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 | Command | Description |
 | --- | --- |
-| `tracebird` / `tracebird live` | Start the OTLP receiver and capture spans. |
-| `tracebird open <file.jsonl>` | Load a saved session and serve the UI _(Stage 3)_. |
+| `tracebird` / `tracebird live` | Start the OTLP receiver, capture spans, and serve the UI. |
+| `tracebird open <file.jsonl>` | Load a saved session and serve the UI (no receiver). |
+
+## JSON API
+
+The UI reads a small read-only API (everything delegates to `@tracebird/core`):
+
+| Route | Returns |
+| --- | --- |
+| `GET /api/session` | `{ live, filePath, count }` |
+| `GET /api/runs` | run summaries, newest first |
+| `GET /api/runs/:id` | a full reconstructed `Run` |
 
 ## Options
 

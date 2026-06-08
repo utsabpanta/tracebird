@@ -4,6 +4,9 @@ import { createServer, listen } from '../server.js';
 import { SessionStore } from '../storage/session-store.js';
 import { TraceBuffer } from '../trace-buffer.js';
 import { renderRunTree } from '../render/tree.js';
+import { createAppHandler } from '../app.js';
+import { resolveUiDir } from '../ui-dir.js';
+import { openBrowser } from '../open-browser.js';
 
 export interface LiveOptions {
   port: number;
@@ -13,9 +16,8 @@ export interface LiveOptions {
 }
 
 /**
- * `tracebird live` — start the OTLP receiver, buffer spans per trace, and on
- * each completed trace reconstruct a run, print its decision tree, and append
- * it to the session file. (Stage 3 serves the UI and opens the browser.)
+ * `tracebird live` — start the OTLP receiver, reconstruct each completed trace,
+ * print its tree, persist it, and serve the UI (which polls the JSON API).
  */
 export async function runLive(options: LiveOptions): Promise<void> {
   const store = new SessionStore(join(options.outDir, `session-${Date.now()}.jsonl`));
@@ -28,7 +30,11 @@ export async function runLive(options: LiveOptions): Promise<void> {
     },
   });
 
-  const server = createServer({ onExport: (spans) => buffer.add(spans) });
+  const server = createServer({
+    onExport: (spans) => buffer.add(spans),
+    extraHandler: createAppHandler({ store, live: true }, resolveUiDir()),
+  });
+
   const boundPort = await listen(server, options.port, options.host);
   const endpoint = `http://${options.host}:${boundPort}`;
 
@@ -37,6 +43,7 @@ export async function runLive(options: LiveOptions): Promise<void> {
       '',
       '  tracebird — listening for OpenTelemetry traces',
       '',
+      `  UI              ${endpoint}`,
       `  OTLP endpoint   ${endpoint}/v1/traces`,
       `  Session file    ${store.filePath}`,
       '',
@@ -47,6 +54,8 @@ export async function runLive(options: LiveOptions): Promise<void> {
       '',
     ].join('\n') + '\n',
   );
+
+  if (options.open) openBrowser(endpoint);
 
   await new Promise<void>((resolveShutdown) => {
     const shutdown = () => {

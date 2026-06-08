@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
 import { runLive } from './commands/live.js';
+import { runOpen } from './commands/open.js';
 
 const HELP = `tracebird — a local-first, time-travel debugger for AI agent runs.
 
@@ -50,11 +51,16 @@ async function main(argv: string[]): Promise<void> {
     case 'live':
       await runLive({ port, host, outDir, open });
       break;
-    case 'open':
-      // Implemented in Stage 3 (load a saved session, serve the UI).
-      process.stderr.write('`tracebird open` arrives with the UI in Stage 3.\n');
-      process.exitCode = 1;
+    case 'open': {
+      const file = positionals[1];
+      if (!file) {
+        process.stderr.write('Usage: tracebird open <file.jsonl>\n');
+        process.exitCode = 1;
+        break;
+      }
+      await runOpen({ file, port, host, open });
       break;
+    }
     case 'help':
       process.stdout.write(HELP);
       break;
