@@ -34,6 +34,7 @@ export {
   parseSession,
   RunParseError,
 } from './serialize.js';
+export { normalizeSpan, detectDialect, ADAPTERS, type Adapter } from './adapters/index.js';
 export { diffRuns, diffCalls, diffText } from './diff.js';
 export type {
   RunDiff,

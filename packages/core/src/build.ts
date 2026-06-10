@@ -1,5 +1,6 @@
 import { compareNano, durationMs } from './time.js';
 import { estimateCost, type PriceTable } from './cost.js';
+import { normalizeSpan } from './adapters/index.js';
 import {
   agentName,
   classifyKind,
@@ -200,7 +201,10 @@ function runStatus(all: TraceNode[]): Run['status'] {
  * become roots; everything hangs under one synthetic run node so nothing is
  * dropped. Unknown operations degrade to generic `step` nodes.
  */
-export function buildRun(spans: Span[], options: BuildOptions = {}): Run {
+export function buildRun(rawSpans: Span[], options: BuildOptions = {}): Run {
+  // Normalize vendor dialects (OpenInference, Vercel AI SDK, Claude Code, …)
+  // into canonical gen_ai.* before reconstruction.
+  const spans = rawSpans.map(normalizeSpan);
   const byId = new Map(spans.map((s) => [s.spanId, s]));
   const childSpans = new Map<string, Span[]>();
   const roots: Span[] = [];
