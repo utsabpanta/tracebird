@@ -1,0 +1,15 @@
+{
+  "name": "tracebird-gif-capture",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Capture a demo GIF of the tracebird UI (scrubber + diff) — dev tooling only.",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "dependencies": {
+    "gifenc": "^1.0.3",
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^23.11.1"
+  }
+}

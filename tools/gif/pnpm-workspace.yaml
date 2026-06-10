@@ -1,0 +1,3 @@
+# Standalone tooling project — isolated from the tracebird monorepo so its
+# (puppeteer) deps never touch the core install.
+packages: []

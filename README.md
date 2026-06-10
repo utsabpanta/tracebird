@@ -10,7 +10,9 @@ trace. tracebird captures the OpenTelemetry GenAI spans your agent already
 emits, reconstructs them into an inspectable decision tree, and lets you step
 through and diff runs locally.
 
-![tracebird inspecting an agent run](docs/screenshot.png)
+![tracebird — step through an agent run, time-travel the scrubber, and diff two runs](docs/demo.gif)
+
+<sub>Inspect a run, scrub through it in time, then diff two runs. ([static screenshot](docs/screenshot.png))</sub>
 
 ## Quickstart
 
@@ -47,6 +49,8 @@ npx @tracebird/cli open ./session.jsonl
 - **Inspector** — prompt, completion, tool args/result, tokens, cost, model, timing.
 - **Time-travel scrubber** — drag through the run; the selection follows time.
 - **Diff** — pick two runs; see the structural + word-level text diff ("worked yesterday").
+- **Search** — filter runs by status or full-text across prompts, tools, and models.
+- **Share** — export any run as a self-contained HTML page a coworker opens offline.
 - **Live** — runs stream into the UI the moment they complete (SSE, no refresh).
 - **Terminal tree** — `live` prints each reconstructed run as it arrives.
 
@@ -56,14 +60,16 @@ tracebird ingests the vendor-neutral OpenTelemetry **GenAI** conventions and
 **auto-normalizes** the popular dialects, so the tree, tokens, cost, and prompts
 render without configuration:
 
-| Source | Notes |
+| Source | Guide |
 | --- | --- |
-| OpenLLMetry / Traceloop | OpenAI, Anthropic, LangChain, LlamaIndex, … |
-| OpenInference (Arize Phoenix) | `openinference.span.kind` + `llm.*` |
-| Vercel AI SDK | `experimental_telemetry` (`ai.*` spans) |
-| Claude Code | enhanced telemetry (`claude_code.*`, beta) |
-| Raw OpenTelemetry GenAI | `gen_ai.*` attributes or events |
+| OpenLLMetry / Traceloop (OpenAI, Anthropic, LangChain, LlamaIndex, …) | [docs](./docs/integrations/openllmetry.md) |
+| OpenInference (Arize Phoenix) | [docs](./docs/integrations/openinference.md) |
+| Vercel AI SDK (`experimental_telemetry`) | [docs](./docs/integrations/vercel-ai-sdk.md) |
+| Claude Code (enhanced telemetry, beta) | [docs](./docs/integrations/claude-code.md) |
+| LangChain / LangGraph | [docs](./docs/integrations/langchain.md) |
+| Raw OpenTelemetry GenAI | [docs](./docs/integrations/raw-otel.md) |
 
+Full setup per framework is in [`docs/integrations/`](./docs/integrations).
 See [`examples/`](./examples) for runnable agents — including a **keyless** one
 that needs no API key.
 
