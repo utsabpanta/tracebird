@@ -449,6 +449,20 @@ body {
   color: var(--ok);
   border-color: var(--ok);
 }
+.badge-activity {
+  color: var(--accent);
+  border-color: var(--accent);
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
 
 /* Inspector --------------------------------------------------------------- */
 .inspector {

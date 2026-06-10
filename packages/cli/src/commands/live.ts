@@ -7,6 +7,7 @@ import { renderRunTree } from '../render/tree.js';
 import { createAppHandler } from '../app.js';
 import { resolveUiDir } from '../ui-dir.js';
 import { openBrowser } from '../open-browser.js';
+import { SseHub } from '../sse.js';
 
 export interface LiveOptions {
   port: number;
@@ -21,18 +22,23 @@ export interface LiveOptions {
  */
 export async function runLive(options: LiveOptions): Promise<void> {
   const store = new SessionStore(join(options.outDir, `session-${Date.now()}.jsonl`));
+  const sse = new SseHub();
 
   const buffer = new TraceBuffer({
     onComplete: (_traceId, spans) => {
       const run = buildRun(spans);
       store.addRun(run);
       process.stdout.write('\n' + renderRunTree(run) + '\n');
+      sse.broadcast('run', { id: run.id });
     },
   });
 
   const server = createServer({
-    onExport: (spans) => buffer.add(spans),
-    extraHandler: createAppHandler({ store, live: true }, resolveUiDir()),
+    onExport: (spans) => {
+      buffer.add(spans);
+      sse.broadcast('activity', { spans: spans.length });
+    },
+    extraHandler: createAppHandler({ store, live: true }, resolveUiDir(), sse),
   });
 
   const boundPort = await listen(server, options.port, options.host);
@@ -61,6 +67,7 @@ export async function runLive(options: LiveOptions): Promise<void> {
     const shutdown = () => {
       process.stdout.write('\n  Stopping…\n');
       buffer.flushAll();
+      sse.close();
       server.close(() => {
         void store.close().then(() => resolveShutdown());
       });

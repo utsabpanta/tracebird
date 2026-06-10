@@ -35,10 +35,13 @@ export function App() {
   const [selectedNodeId, setSelectedNodeId] = useState<string>();
   const [error, setError] = useState<string>();
   const [mode, setMode] = useState<Mode>('inspect');
+  const [receiving, setReceiving] = useState(false);
 
-  // Poll the session + run list (live mode keeps appending).
+  // Keep the session + run list fresh. We push instantly via SSE and keep a
+  // slow poll as a fallback for environments without EventSource.
   useEffect(() => {
     let cancelled = false;
+    let pulse: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
       try {
         const [s, r] = await Promise.all([api.session(), api.runs()]);
@@ -51,10 +54,24 @@ export function App() {
       }
     };
     void tick();
-    const interval = setInterval(() => void tick(), 2000);
+    const interval = setInterval(() => void tick(), 8000);
+
+    let es: EventSource | undefined;
+    if (typeof EventSource !== 'undefined') {
+      es = new EventSource('/api/stream');
+      es.addEventListener('run', () => void tick());
+      es.addEventListener('activity', () => {
+        setReceiving(true);
+        clearTimeout(pulse);
+        pulse = setTimeout(() => setReceiving(false), 1200);
+      });
+    }
+
     return () => {
       cancelled = true;
       clearInterval(interval);
+      clearTimeout(pulse);
+      es?.close();
     };
   }, []);
 
@@ -114,6 +131,7 @@ export function App() {
         </div>
         <span className="spacer" />
         {error && <span className="badge badge-error">{error}</span>}
+        {receiving && <span className="badge badge-activity">● receiving spans…</span>}
         {session?.live && <span className="badge badge-live">● live</span>}
         <span className="run-count">
           {runs.length} run{runs.length === 1 ? '' : 's'}
