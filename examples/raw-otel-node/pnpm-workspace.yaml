@@ -1,0 +1,4 @@
+# Standalone project: this file makes pnpm treat the example as its own root,
+# so `pnpm install` here installs only the example's deps and does not attach to
+# the tracebird monorepo above it.
+packages: []

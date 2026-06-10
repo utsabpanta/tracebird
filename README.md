@@ -14,6 +14,14 @@ through and diff runs locally.
 
 ## Quickstart
 
+Just want to see it? Open the UI pre-loaded with sample runs — no agent needed:
+
+```sh
+npx @tracebird/cli demo
+```
+
+Otherwise, start the receiver:
+
 ```sh
 npx @tracebird/cli
 ```
@@ -39,7 +47,25 @@ npx @tracebird/cli open ./session.jsonl
 - **Inspector** — prompt, completion, tool args/result, tokens, cost, model, timing.
 - **Time-travel scrubber** — drag through the run; the selection follows time.
 - **Diff** — pick two runs; see the structural + word-level text diff ("worked yesterday").
+- **Live** — runs stream into the UI the moment they complete (SSE, no refresh).
 - **Terminal tree** — `live` prints each reconstructed run as it arrives.
+
+## Works with your stack
+
+tracebird ingests the vendor-neutral OpenTelemetry **GenAI** conventions and
+**auto-normalizes** the popular dialects, so the tree, tokens, cost, and prompts
+render without configuration:
+
+| Source | Notes |
+| --- | --- |
+| OpenLLMetry / Traceloop | OpenAI, Anthropic, LangChain, LlamaIndex, … |
+| OpenInference (Arize Phoenix) | `openinference.span.kind` + `llm.*` |
+| Vercel AI SDK | `experimental_telemetry` (`ai.*` spans) |
+| Claude Code | enhanced telemetry (`claude_code.*`, beta) |
+| Raw OpenTelemetry GenAI | `gen_ai.*` attributes or events |
+
+See [`examples/`](./examples) for runnable agents — including a **keyless** one
+that needs no API key.
 
 ## How it works
 
@@ -64,11 +90,22 @@ This is an [Nx](https://nx.dev) + [pnpm](https://pnpm.io) integrated monorepo.
 
 ```sh
 pnpm install
-npx nx run-many -t build test lint     # the full gate
-npx nx run smoke:e2e                    # end-to-end against the built CLI
-npx nx test core                       # one project
-npx nx dev ui                          # UI dev server (proxies /api to :4318)
+
+# Run it locally (builds the CLI + UI, then launches):
+pnpm demo        # serve the UI with bundled sample runs — best first look
+pnpm start       # start the OTLP receiver + UI on :4318 (point a real agent at it)
+
+# Quality gates:
+pnpm build       # nx run-many -t build  (all packages)
+pnpm test        # nx run-many -t test   (80 unit/integration tests)
+pnpm lint        # nx run-many -t lint
+pnpm e2e         # end-to-end against the built CLI binary
+
+npx nx test core   # a single project
+npx nx dev ui      # UI dev server with HMR (proxies /api to :4318)
 ```
+
+> `pnpm demo` / `pnpm start` build first, so they work from a fresh clone.
 
 Releases are managed with [changesets](https://github.com/changesets/changesets);
 CI (`.github/workflows`) runs build + test + lint + e2e on every PR.

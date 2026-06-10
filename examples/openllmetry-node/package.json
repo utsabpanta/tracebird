@@ -1,0 +1,14 @@
+{
+  "name": "tracebird-example-openllmetry",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Auto-instrument a real OpenAI tool-calling run with OpenLLMetry, sent to tracebird.",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@traceloop/node-server-sdk": "^0.14.0",
+    "openai": "^4.77.0"
+  }
+}
