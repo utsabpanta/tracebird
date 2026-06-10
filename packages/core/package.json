@@ -1,6 +1,6 @@
 {
   "name": "@tracebird/core",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Span → agent-decision-tree reconstruction for tracebird. Pure TypeScript, no I/O.",
   "license": "MIT",
   "author": "utsabpanta",

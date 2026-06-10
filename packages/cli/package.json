@@ -1,6 +1,6 @@
 {
   "name": "@tracebird/cli",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "tracebird CLI — a local OTLP receiver and time-travel UI for AI agent runs.",
   "license": "MIT",
   "author": "utsabpanta",
