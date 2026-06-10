@@ -14,6 +14,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +37,12 @@ jobs:
 
       # Opens/updates a "Version Packages" PR; when that PR merges, publishes the
       # bumped @tracebird/* packages to npm with public access.
+      #
+      # Skipped until an NPM_TOKEN secret is configured, so the workflow stays
+      # green while releases are cut manually. Add the token to re-enable:
+      #   gh secret set NPM_TOKEN --body "<npm automation token>"
       - name: Changesets release
+        if: env.NPM_TOKEN != ''
         uses: changesets/action@v1
         with:
           version: pnpm version
