@@ -86,9 +86,10 @@ your agent ──OTLP/HTTP──▶ @tracebird/cli ──▶ @tracebird/core ─
 
 ## v1 scope
 
-Read-only forensics on a completed run. **Not yet** (see [`ROADMAP.md`](./ROADMAP.md)):
-replay-execution, cloud sync / hosted version, auth / multi-user, eval scoring,
-multi-agent topology graphs, gRPC ingest, SQLite persistence, VS Code extension.
+Read-only forensics on agent runs — live as they complete, or loaded from a saved
+session. **Not yet** (see [`ROADMAP.md`](./ROADMAP.md)): replay-execution, cloud
+sync / hosted version, auth / multi-user, eval scoring, multi-agent topology
+graphs, gRPC ingest, SQLite persistence, VS Code extension.
 
 ## Develop
 

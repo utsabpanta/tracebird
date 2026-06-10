@@ -1,8 +1,9 @@
 # Roadmap
 
-tracebird v1 is deliberately small: **read-only forensics on a completed agent
-run.** The boundary below is what keeps it focused. These are explicitly **not**
-in v1 — they live here so the line stays visible.
+tracebird v1 is deliberately small: **read-only forensics on agent runs** — live
+as they complete, or loaded from a saved session. The boundary below is what keeps
+it focused. These are explicitly **not** in v1 — they live here so the line stays
+visible.
 
 ## Later (not in v1)
 
