@@ -57,6 +57,10 @@ importers:
       protobufjs:
         specifier: ^7.4.0
         version: 7.6.2
+    devDependencies:
+      '@tracebird/fixtures':
+        specifier: workspace:*
+        version: link:../../libs/fixtures
 
   packages/core: {}
 

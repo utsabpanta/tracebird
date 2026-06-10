@@ -20,6 +20,9 @@
     "@tracebird/core": "workspace:*",
     "protobufjs": "^7.4.0"
   },
+  "devDependencies": {
+    "@tracebird/fixtures": "workspace:*"
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",

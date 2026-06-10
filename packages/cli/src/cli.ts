@@ -2,11 +2,13 @@ import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
 import { runLive } from './commands/live.js';
 import { runOpen } from './commands/open.js';
+import { runDemo } from './commands/demo.js';
 
 const HELP = `tracebird — a local-first, time-travel debugger for AI agent runs.
 
 Usage:
   tracebird [live]                 Start the OTLP receiver + UI (default).
+  tracebird demo                   Serve the UI with bundled sample runs (no agent needed).
   tracebird open <file.jsonl>      Load a saved session and serve the UI.
   tracebird --help                 Show this help.
 
@@ -50,6 +52,9 @@ async function main(argv: string[]): Promise<void> {
   switch (command) {
     case 'live':
       await runLive({ port, host, outDir, open });
+      break;
+    case 'demo':
+      await runDemo({ port, host, open });
       break;
     case 'open': {
       const file = positionals[1];

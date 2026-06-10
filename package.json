@@ -13,6 +13,8 @@
     "test": "nx run-many -t test",
     "lint": "nx run-many -t lint",
     "e2e": "nx run smoke:e2e",
+    "start": "nx run cli:build && node packages/cli/dist/cli.js live",
+    "demo": "nx run cli:build && node packages/cli/dist/cli.js demo",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",
