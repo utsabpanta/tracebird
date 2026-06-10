@@ -9,13 +9,14 @@ import type { SseHub } from './sse.js';
  * (with SPA fallback).
  */
 export function createAppHandler(ctx: ApiContext, uiDir: string, sse?: SseHub) {
+  const apiCtx: ApiContext = { ...ctx, uiDir };
   return (req: IncomingMessage, res: ServerResponse): boolean => {
     const url = (req.url ?? '/').split('?')[0];
     if (sse && req.method === 'GET' && url === '/api/stream') {
       sse.handle(req, res);
       return true;
     }
-    if (handleApi(ctx, req, res)) return true;
+    if (handleApi(apiCtx, req, res)) return true;
     if (serveStatic(uiDir, req, res)) return true;
     return false;
   };

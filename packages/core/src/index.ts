@@ -35,6 +35,7 @@ export {
   RunParseError,
 } from './serialize.js';
 export { normalizeSpan, detectDialect, ADAPTERS, type Adapter } from './adapters/index.js';
+export { runMatches, runSearchText } from './search.js';
 export { diffRuns, diffCalls, diffText } from './diff.js';
 export type {
   RunDiff,

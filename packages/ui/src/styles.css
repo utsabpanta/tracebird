@@ -307,6 +307,46 @@ body {
   padding: 14px 16px 8px;
 }
 
+/* Run filters ------------------------------------------------------------- */
+.run-filters {
+  padding: 0 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.run-search {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.run-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.status-filter {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+.status-filter button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.status-filter button.active {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
 /* Run list ---------------------------------------------------------------- */
 .run-list {
   list-style: none;
@@ -374,6 +414,37 @@ body {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--panel);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.run-bar-main {
+  min-width: 0;
+  flex: 1;
+}
+.run-bar-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.share-btn:hover {
+  background: rgba(110, 168, 254, 0.12);
+}
+.share-btn-ghost {
+  border-color: var(--border);
+  color: var(--muted);
 }
 .run-bar-summary {
   font-weight: 600;

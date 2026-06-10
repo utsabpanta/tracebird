@@ -1,6 +1,20 @@
 import { createWriteStream, mkdirSync, readFileSync, type WriteStream } from 'node:fs';
 import { dirname } from 'node:path';
-import { parseSession, serializeRun, StatusCode, type Run, type TraceNode } from '@tracebird/core';
+import {
+  parseSession,
+  runMatches,
+  serializeRun,
+  StatusCode,
+  type Run,
+  type TraceNode,
+} from '@tracebird/core';
+
+export interface RunFilter {
+  /** Deep text search across summary, prompts, completions, tool I/O. */
+  query?: string;
+  /** Restrict by status; `'all'` (default) keeps everything. */
+  status?: 'all' | 'ok' | 'error' | 'unset';
+}
 
 /** Lightweight run summary for list views (no heavy prompt/completion payloads). */
 export interface RunSummary {
@@ -66,9 +80,13 @@ export class SessionStore {
     return this.runs;
   }
 
-  /** Run summaries, newest first. */
-  list(): RunSummary[] {
+  /** Run summaries, newest first, optionally filtered by text and status. */
+  list(filter: RunFilter = {}): RunSummary[] {
+    const status = filter.status ?? 'all';
+    const query = filter.query ?? '';
     return this.runs
+      .filter((run) => status === 'all' || statusLabel(run.status.code) === status)
+      .filter((run) => runMatches(run, query))
       .map((run) => ({
         id: run.id,
         traceId: run.traceId,

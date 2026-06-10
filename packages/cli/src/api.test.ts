@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
@@ -50,6 +50,19 @@ describe('JSON API', () => {
     expect(runs[0].id).toBe(errorRun.id); // later base timestamp
   });
 
+  it('GET /api/runs?q=&status= filters by deep text and status', async () => {
+    const base = await boot('/no/such/ui');
+    const byText = (await (await fetch(`${base}/api/runs?q=atlantis`)).json()) as { id: string }[];
+    expect(byText).toHaveLength(1);
+    expect(byText[0].id).toBe(errorRun.id);
+
+    const errorsOnly = (await (await fetch(`${base}/api/runs?status=error`)).json()) as unknown[];
+    expect(errorsOnly).toHaveLength(1);
+
+    const none = (await (await fetch(`${base}/api/runs?q=nonexistentterm`)).json()) as unknown[];
+    expect(none).toHaveLength(0);
+  });
+
   it('GET /api/runs/:id returns the full run, 404 for unknown', async () => {
     const base = await boot('/no/such/ui');
     const run = await (await fetch(`${base}/api/runs/${encodeURIComponent(weatherRun.id)}`)).json();
@@ -75,6 +88,50 @@ describe('JSON API', () => {
 
     expect((await fetch(`${base}/api/diff?a=${a}`)).status).toBe(400);
     expect((await fetch(`${base}/api/diff?a=${a}&b=missing`)).status).toBe(404);
+  });
+});
+
+describe('shareable export', () => {
+  it('exports a single run as jsonl (re-openable session)', async () => {
+    const base = await boot('/no/such/ui');
+    const res = await fetch(`${base}/api/export?id=${encodeURIComponent(weatherRun.id)}&format=jsonl`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-disposition')).toContain('.jsonl');
+    const text = await res.text();
+    expect(text.trim().split('\n')).toHaveLength(1);
+    expect(JSON.parse(text.trim()).traceId).toBe(weatherRun.traceId);
+  });
+
+  it('exports a self-contained HTML snapshot with assets inlined', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tb-ui-'));
+    dirs.push(dir);
+    mkdirSync(join(dir, 'assets'));
+    writeFileSync(join(dir, 'assets', 'app.js'), 'console.log("hello-bundle")');
+    writeFileSync(join(dir, 'assets', 'app.css'), 'body{color:red}');
+    writeFileSync(
+      join(dir, 'index.html'),
+      '<!doctype html><head><link rel="stylesheet" crossorigin href="./assets/app.css"></head>' +
+        '<body><div id="root"></div>' +
+        '<script type="module" crossorigin src="./assets/app.js"></script></body>',
+    );
+    const base = await boot(dir);
+
+    const res = await fetch(`${base}/api/export?id=${encodeURIComponent(weatherRun.id)}&format=html`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/html');
+    const html = await res.text();
+    expect(html).toContain('window.__TRACEBIRD_SNAPSHOT__');
+    expect(html).toContain('console.log("hello-bundle")'); // js inlined
+    expect(html).toContain('body{color:red}'); // css inlined
+    expect(html).not.toContain('src="./assets'); // no external asset refs
+    expect(html).toContain(weatherRun.traceId); // run data embedded
+  });
+
+  it('404s an unknown run and 503s HTML export without a UI', async () => {
+    const base = await boot('/no/such/ui');
+    expect((await fetch(`${base}/api/export?id=missing&format=jsonl`)).status).toBe(404);
+    const html = await fetch(`${base}/api/export?id=${encodeURIComponent(weatherRun.id)}&format=html`);
+    expect(html.status).toBe(503);
   });
 });
 

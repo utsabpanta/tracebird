@@ -1,6 +1,9 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { diffRuns } from '@tracebird/core';
+import { diffRuns, type Run } from '@tracebird/core';
 import type { SessionStore } from './storage/session-store.js';
+import { buildHtmlSnapshot, exportJsonl } from './export.js';
 
 /**
  * The JSON API the UI reads. Pure delegation to the {@link SessionStore} (which
@@ -14,6 +17,8 @@ import type { SessionStore } from './storage/session-store.js';
 export interface ApiContext {
   store: SessionStore;
   live: boolean;
+  /** Directory of the built UI assets (needed for HTML snapshot export). */
+  uiDir?: string;
 }
 
 function json(res: ServerResponse, status: number, payload: unknown): void {
@@ -41,7 +46,14 @@ export function handleApi(ctx: ApiContext, req: IncomingMessage, res: ServerResp
   }
 
   if (url === '/api/runs') {
-    json(res, 200, ctx.store.list());
+    const params = new URL(req.url ?? '', 'http://localhost').searchParams;
+    const query = params.get('q') ?? undefined;
+    const statusParam = params.get('status');
+    const status =
+      statusParam === 'ok' || statusParam === 'error' || statusParam === 'unset'
+        ? statusParam
+        : 'all';
+    json(res, 200, ctx.store.list({ query, status }));
     return true;
   }
 
@@ -60,6 +72,47 @@ export function handleApi(ctx: ApiContext, req: IncomingMessage, res: ServerResp
       return true;
     }
     json(res, 200, diffRuns(a, b));
+    return true;
+  }
+
+  if (url === '/api/export') {
+    const params = new URL(req.url ?? '', 'http://localhost').searchParams;
+    const id = params.get('id');
+    const format = params.get('format') === 'jsonl' ? 'jsonl' : 'html';
+
+    let runs: Run[];
+    let name: string;
+    if (id) {
+      const run = ctx.store.get(id);
+      if (!run) {
+        json(res, 404, { error: `run not found: ${id}` });
+        return true;
+      }
+      runs = [run];
+      name = `tracebird-run-${run.traceId.slice(0, 8) || 'export'}`;
+    } else {
+      runs = ctx.store.all();
+      name = 'tracebird-session';
+    }
+
+    if (format === 'jsonl') {
+      res.writeHead(200, {
+        'content-type': 'application/x-ndjson; charset=utf-8',
+        'content-disposition': `attachment; filename="${name}.jsonl"`,
+      });
+      res.end(exportJsonl(runs));
+      return true;
+    }
+
+    if (!ctx.uiDir || !existsSync(join(ctx.uiDir, 'index.html'))) {
+      json(res, 503, { error: 'UI assets not available for HTML export' });
+      return true;
+    }
+    res.writeHead(200, {
+      'content-type': 'text/html; charset=utf-8',
+      'content-disposition': `attachment; filename="${name}.html"`,
+    });
+    res.end(buildHtmlSnapshot(ctx.uiDir, runs));
     return true;
   }
 

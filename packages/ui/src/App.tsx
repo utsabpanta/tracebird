@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Run, TraceNode } from '@tracebird/core';
-import { api, type RunSummary, type SessionInfo } from './api.js';
+import { api, isSnapshot, type RunSummary, type SessionInfo } from './api.js';
 import { RunList } from './components/RunList.js';
 import { ExecutionTree } from './components/ExecutionTree.js';
 import { Inspector } from './components/Inspector.js';
@@ -36,15 +36,42 @@ export function App() {
   const [error, setError] = useState<string>();
   const [mode, setMode] = useState<Mode>('inspect');
   const [receiving, setReceiving] = useState(false);
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'error'>('all');
+  const [revalidate, setRevalidate] = useState(0);
 
-  // Keep the session + run list fresh. We push instantly via SSE and keep a
-  // slow poll as a fallback for environments without EventSource.
+  // SSE pushes (with a slow-poll fallback) trigger a revalidation by bumping a
+  // counter; the fetch effect below owns the actual request.
+  useEffect(() => {
+    if (isSnapshot) return; // exported snapshot is static — nothing to poll/stream
+    let pulse: ReturnType<typeof setTimeout> | undefined;
+    const bump = () => setRevalidate((v) => v + 1);
+    const interval = setInterval(bump, 8000);
+
+    let es: EventSource | undefined;
+    if (typeof EventSource !== 'undefined') {
+      es = new EventSource('/api/stream');
+      es.addEventListener('run', bump);
+      es.addEventListener('activity', () => {
+        setReceiving(true);
+        clearTimeout(pulse);
+        pulse = setTimeout(() => setReceiving(false), 1200);
+      });
+    }
+    return () => {
+      clearInterval(interval);
+      clearTimeout(pulse);
+      es?.close();
+    };
+  }, []);
+
+  // Fetch the session + (filtered) run list. Re-runs on filter changes
+  // (debounced) and whenever the SSE/poll counter bumps.
   useEffect(() => {
     let cancelled = false;
-    let pulse: ReturnType<typeof setTimeout> | undefined;
-    const tick = async () => {
+    const fetchRuns = async () => {
       try {
-        const [s, r] = await Promise.all([api.session(), api.runs()]);
+        const [s, r] = await Promise.all([api.session(), api.runs(query, statusFilter)]);
         if (cancelled) return;
         setSession(s);
         setRuns(r);
@@ -53,27 +80,12 @@ export function App() {
         if (!cancelled) setError((e as Error).message);
       }
     };
-    void tick();
-    const interval = setInterval(() => void tick(), 8000);
-
-    let es: EventSource | undefined;
-    if (typeof EventSource !== 'undefined') {
-      es = new EventSource('/api/stream');
-      es.addEventListener('run', () => void tick());
-      es.addEventListener('activity', () => {
-        setReceiving(true);
-        clearTimeout(pulse);
-        pulse = setTimeout(() => setReceiving(false), 1200);
-      });
-    }
-
+    const t = setTimeout(fetchRuns, query ? 200 : 0);
     return () => {
       cancelled = true;
-      clearInterval(interval);
-      clearTimeout(pulse);
-      es?.close();
+      clearTimeout(t);
     };
-  }, []);
+  }, [query, statusFilter, revalidate]);
 
   useEffect(() => {
     if (!selectedRunId && runs.length > 0) setSelectedRunId(runs[0].id);
@@ -146,6 +158,32 @@ export function App() {
         <div className="layout">
           <aside className="sidebar">
             <h2 className="pane-title">Runs</h2>
+            <div className="run-filters">
+              <input
+                type="search"
+                className="run-search"
+                placeholder="Search prompts, tools, models…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Search runs"
+              />
+              <div className="status-filter" role="group" aria-label="Filter by status">
+                <button
+                  type="button"
+                  className={statusFilter === 'all' ? 'active' : ''}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={statusFilter === 'error' ? 'active' : ''}
+                  onClick={() => setStatusFilter('error')}
+                >
+                  Errors
+                </button>
+              </div>
+            </div>
             <RunList runs={runs} selectedId={selectedRunId} onSelect={setSelectedRunId} />
           </aside>
 
@@ -153,15 +191,35 @@ export function App() {
             {run ? (
               <>
                 <div className="run-bar">
-                  <div className="run-bar-summary" title={run.summary}>
-                    {run.summary}
+                  <div className="run-bar-main">
+                    <div className="run-bar-summary" title={run.summary}>
+                      {run.summary}
+                    </div>
+                    <div className="run-bar-metrics">
+                      <span>{formatDuration(run.durationMs)}</span>
+                      <span>{formatTokens(run.tokens.total)} tokens</span>
+                      <span>{formatCost(run.costUsd)}</span>
+                      {run.service && <span className="muted">{run.service}</span>}
+                    </div>
                   </div>
-                  <div className="run-bar-metrics">
-                    <span>{formatDuration(run.durationMs)}</span>
-                    <span>{formatTokens(run.tokens.total)} tokens</span>
-                    <span>{formatCost(run.costUsd)}</span>
-                    {run.service && <span className="muted">{run.service}</span>}
-                  </div>
+                  {!isSnapshot && (
+                    <div className="run-bar-actions">
+                      <a
+                        className="share-btn"
+                        href={`/api/export?id=${encodeURIComponent(run.id)}&format=html`}
+                        title="Download a self-contained HTML you can share with anyone"
+                      >
+                        ⬇ Share
+                      </a>
+                      <a
+                        className="share-btn share-btn-ghost"
+                        href={`/api/export?id=${encodeURIComponent(run.id)}&format=jsonl`}
+                        title="Download as .jsonl (re-open with `tracebird open`)"
+                      >
+                        .jsonl
+                      </a>
+                    </div>
+                  )}
                 </div>
                 <Scrubber
                   timeline={timeline}
