@@ -4,6 +4,13 @@
   "private": true,
   "description": "tracebird — a local-first, time-travel debugger for AI agent runs.",
   "license": "MIT",
+  "author": "utsabpanta",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utsabpanta/tracebird.git"
+  },
+  "homepage": "https://github.com/utsabpanta/tracebird#readme",
+  "bugs": "https://github.com/utsabpanta/tracebird/issues",
   "type": "module",
   "engines": {
     "node": ">=20"

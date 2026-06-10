@@ -3,6 +3,25 @@
   "version": "0.0.1",
   "description": "Span → agent-decision-tree reconstruction for tracebird. Pure TypeScript, no I/O.",
   "license": "MIT",
+  "author": "utsabpanta",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utsabpanta/tracebird.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/utsabpanta/tracebird#readme",
+  "bugs": "https://github.com/utsabpanta/tracebird/issues",
+  "keywords": [
+    "opentelemetry",
+    "otlp",
+    "llm",
+    "ai-agents",
+    "observability",
+    "tracing",
+    "debugger",
+    "genai",
+    "gen-ai"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

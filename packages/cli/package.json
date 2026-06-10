@@ -3,6 +3,26 @@
   "version": "0.0.1",
   "description": "tracebird CLI — a local OTLP receiver and time-travel UI for AI agent runs.",
   "license": "MIT",
+  "author": "utsabpanta",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utsabpanta/tracebird.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/utsabpanta/tracebird#readme",
+  "bugs": "https://github.com/utsabpanta/tracebird/issues",
+  "keywords": [
+    "opentelemetry",
+    "otlp",
+    "llm",
+    "ai-agents",
+    "observability",
+    "tracing",
+    "debugger",
+    "genai",
+    "cli",
+    "devtools"
+  ],
   "type": "module",
   "bin": {
     "tracebird": "./dist/cli.js"
