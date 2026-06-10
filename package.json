@@ -31,8 +31,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "nx",
-      "protobufjs"
+      "nx"
     ]
   },
   "devDependencies": {

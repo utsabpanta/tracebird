@@ -37,8 +37,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@tracebird/core": "workspace:*",
-    "protobufjs": "^7.4.0"
+    "@tracebird/core": "workspace:*"
   },
   "devDependencies": {
     "@tracebird/fixtures": "workspace:*"
